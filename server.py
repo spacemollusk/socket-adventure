@@ -160,7 +160,7 @@ class Server(object):
         """
         
         try:
-            self.room = moves[(self.room, argument)]
+            self.room = self.moves[(self.room, argument)]
             self.output_buffer = self.room_description
         except KeyError:
             self.output_buffer = "You can't go that way from here!"
@@ -208,6 +208,15 @@ class Server(object):
         
         :return: None
         """
+        received = self.input_buffer.split(" ")
+
+        command = received.pop(0)
+        arguments = " ".join(received)
+
+        { 'quit': self.quit,
+          'move': self.move,
+          'say': self.say
+        }[command](arguments)
 
         if self.input_buffer.startswith("say "):
             say_arg = self.input_buffer[4:]
