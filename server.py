@@ -78,9 +78,18 @@ class Server(object):
         :param room_number: int
         :return: str
         """
-
-        # TODO: YOUR CODE HERE
-
+        if room_number == 0:
+            return "You are in a large room with stone walls and a wooden door \
+                   on the north, east, and west walls."
+        elif room_number == 1:
+            return "You enter a small storage room with shelves full of \
+                   strange jars."
+        elif room_number == 2:
+            return "This room has fancy red wallpaper and a skylight in the \
+                   ceiling."
+        elif room_number == 3:
+            return "There appears to be nothing in this room but a marble \
+                   statue of a wizard."
         pass
 
     def greet(self):
