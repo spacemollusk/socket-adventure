@@ -142,9 +142,21 @@ class Server(object):
         :return: None
         """
 
-        # TODO: YOUR CODE HERE
-
-        pass
+        # Implementing the game map as a dict with (origin, direction) tuples as
+        # keys, and resulting destinations as values. If the tuple is not in the
+        # keyset, then the move is not possible.
+        moves = {(0, 'north'):3,
+                 (0, 'east'):2,
+                 (0, 'west'):1,
+                 (1, 'east'):0,
+                 (2, 'west'):0,
+                 (3, 'south'):0}
+        
+        try:
+            self.room = moves[(self.room, argument)]
+            self.output_buffer += self.room_description
+        except KeyError:
+            self.output_buffer += "You can't go that way!"
 
     def say(self, argument):
         """
