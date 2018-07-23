@@ -55,6 +55,16 @@ class Server(object):
 
         self.room = 0
 
+        # I've chosen to implement the game map as an instance variable dict.
+        # The keys are (current_room, direction_to_go) tuples, and their keys
+        # are the resulting destinations.
+        self.moves = {(0, 'north'):3,
+                      (0, 'east'):2,
+                      (0, 'west'):1,
+                      (1, 'east'):0,
+                      (2, 'west'):0,
+                      (3, 'south'):0}
+
     def connect(self):
         self.socket = socket.socket(
             socket.AF_INET,
@@ -115,10 +125,12 @@ class Server(object):
          
         :return: None 
         """
+        received = b'\n'
+        while b'\n' not in received:
+            received += self.client_connection.recv(16)
+        
+        self.input_buffer = received.decode.strip()
 
-        # TODO: YOUR CODE HERE
-
-        pass
 
     def move(self, argument):
         """
@@ -137,25 +149,21 @@ class Server(object):
         Puts the room description (see `self.room_description`) for the new room
         into "self.output_buffer".
         
+        Tries to update self.room to the value corresponding to the appropriate
+        (current_room, direction) key in self.moves.
+
+        Raises an error if the requested tuple is not in the key set; i.e.,
+        the player has entered an illegal move.
+
         :param argument: str
         :return: None
         """
-
-        # Implementing the game map as a dict with (origin, direction) tuples as
-        # keys, and resulting destinations as values. If the tuple is not in the
-        # keyset, then the move is not possible.
-        moves = {(0, 'north'):3,
-                 (0, 'east'):2,
-                 (0, 'west'):1,
-                 (1, 'east'):0,
-                 (2, 'west'):0,
-                 (3, 'south'):0}
         
         try:
             self.room = moves[(self.room, argument)]
-            self.output_buffer += self.room_description
+            self.output_buffer = self.room_description
         except KeyError:
-            self.output_buffer += "You can't go that way!"
+            self.output_buffer = "You can't go that way from here!"
 
     def say(self, argument):
         """
@@ -171,7 +179,7 @@ class Server(object):
         :return: None
         """
 
-        self.output_buffer += 'You say: {}'.format(argument)
+        self.output_buffer += 'You say: "{}"'.format(argument)
 
     def quit(self, argument):
         """
@@ -220,9 +228,7 @@ class Server(object):
         
         :return: None 
         """
-
-        output = "OK! " + self.output_buffer + "\n"
-        self.socket.sendall(output)
+        self.client_connection.sendall(b"OK! " + self.output_buffer.encode() + b"\n")
 
     def serve(self):
         self.connect()
