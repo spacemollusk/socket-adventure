@@ -78,19 +78,18 @@ class Server(object):
         :param room_number: int
         :return: str
         """
-        if room_number == 0:
-            return "You are in a large room with stone walls and a wooden door \
-                   on the north, east, and west walls."
-        elif room_number == 1:
-            return "You enter a small storage room with shelves full of \
-                   strange jars."
-        elif room_number == 2:
-            return "This room has fancy red wallpaper and a skylight in the \
-                   ceiling."
-        elif room_number == 3:
-            return "There appears to be nothing in this room but a marble \
-                   statue of a wizard."
-        pass
+        room_descs = ["You are in a large room with stone walls and a wooden door \
+                      on the north, east, and west walls.",
+                      "You enter a small storage room with shelves full of \
+                      strange jars.",
+                      "This room has fancy red wallpaper and a skylight in the \
+                      ceiling.",
+                      "There appears to be nothing in this room but a marble \
+                      statue of a wizard."]
+        try:
+            return room_descs[room_number]
+        except IndexError:
+            return "Whoops, something went wrong with the room system."
 
     def greet(self):
         """
@@ -172,9 +171,7 @@ class Server(object):
         :return: None
         """
 
-        # TODO: YOUR CODE HERE
-
-        pass
+        self.output_buffer += 'You say: {}'.format(argument)
 
     def quit(self, argument):
         """
@@ -188,9 +185,9 @@ class Server(object):
         :return: None
         """
 
-        # TODO: YOUR CODE HERE
-
-        pass
+        self.output_buffer += "Goodbye!"
+        self.push_output()
+        self.done = True
 
     def route(self):
         """
@@ -204,8 +201,14 @@ class Server(object):
         :return: None
         """
 
-        # TODO: YOUR CODE HERE
-
+        if self.input_buffer.startswith("say "):
+            say_arg = self.input_buffer[4:]
+            self.say(say_arg)
+        elif self.input_buffer.startswith("move "):
+            move_arg = self.input_buffer[5:]
+            self.move(move_arg)
+        elif self.input_buffer == "quit":
+            self.quit(None)
         pass
 
     def push_output(self):
@@ -218,9 +221,8 @@ class Server(object):
         :return: None 
         """
 
-        # TODO: YOUR CODE HERE
-
-        pass
+        output = "OK! " + self.output_buffer + "\n"
+        self.socket.sendall(output)
 
     def serve(self):
         self.connect()
