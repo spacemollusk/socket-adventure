@@ -1,6 +1,5 @@
 import socket
 
-
 class Server(object):
     """
     An adventure game socket server
@@ -56,14 +55,16 @@ class Server(object):
         self.room = 0
 
         # I've chosen to implement the game map as an instance variable dict.
-        # The keys are (current_room, direction_to_go) tuples, and their keys
+        # The keys are (current_room, direction_to_go) tuples, and their values
         # are the resulting destinations.
-        self.moves = {(0, 'north'):3,
+        self.moves = {
+                      (0, 'north'):3,
                       (0, 'east'):2,
                       (0, 'west'):1,
                       (1, 'east'):0,
                       (2, 'west'):0,
-                      (3, 'south'):0}
+                      (3, 'south'):0
+                     }
 
     def connect(self):
         self.socket = socket.socket(
@@ -88,14 +89,12 @@ class Server(object):
         :param room_number: int
         :return: str
         """
-        room_descs = ["You are in a large room with stone walls and a wooden door \
-                      on the north, east, and west walls.",
-                      "You enter a small storage room with shelves full of \
-                      strange jars.",
-                      "This room has fancy red wallpaper and a skylight in the \
-                      ceiling.",
-                      "There appears to be nothing in this room but a marble \
-                      statue of a wizard."]
+        room_descs = [
+        "You are in a large room with stone walls and a wooden door on the north, east, and west walls.",
+        "You enter a small storage room with shelves full of strange jars.",
+        "This room has fancy red wallpaper and a skylight in the ceiling.",
+        "There appears to be nothing in this room but a marble statue of a wizard."]
+        
         try:
             return room_descs[room_number]
         except IndexError:
@@ -125,11 +124,11 @@ class Server(object):
          
         :return: None 
         """
-        received = b'\n'
+        received = b''
         while b'\n' not in received:
             received += self.client_connection.recv(16)
         
-        self.input_buffer = received.decode.strip()
+        self.input_buffer = received.decode()
 
 
     def move(self, argument):
@@ -161,7 +160,8 @@ class Server(object):
         
         try:
             self.room = self.moves[(self.room, argument)]
-            self.output_buffer = self.room_description
+            print("self.room set to {}".format)
+            self.output_buffer = self.room_description(self.room)
         except KeyError:
             self.output_buffer = "You can't go that way from here!"
 
@@ -179,7 +179,7 @@ class Server(object):
         :return: None
         """
 
-        self.output_buffer += 'You say: "{}"'.format(argument)
+        self.output_buffer = 'You say: "{}"'.format(argument)
 
     def quit(self, argument):
         """
@@ -193,7 +193,7 @@ class Server(object):
         :return: None
         """
 
-        self.output_buffer += "Goodbye!"
+        self.output_buffer = "Goodbye!"
         self.push_output()
         self.done = True
 
@@ -208,25 +208,28 @@ class Server(object):
         
         :return: None
         """
-        received = self.input_buffer.split(" ")
-
-        command = received.pop(0)
-        arguments = " ".join(received)
-
-        { 'quit': self.quit,
-          'move': self.move,
-          'say': self.say
-        }[command](arguments)
-
-        if self.input_buffer.startswith("say "):
-            say_arg = self.input_buffer[4:]
-            self.say(say_arg)
-        elif self.input_buffer.startswith("move "):
-            move_arg = self.input_buffer[5:]
-            self.move(move_arg)
-        elif self.input_buffer == "quit":
+        if self.input_buffer == "quit":
             self.quit(None)
-        pass
+        else:
+            received = self.input_buffer.strip().split(" ")
+            command = received[0]
+            arguments = received[1:]
+
+        if command == "say":
+            say_arg = ""
+            for word in arguments:
+                say_arg += word + ' '
+            self.say(say_arg)
+        
+        elif command == "move":
+            move_arg = arguments[0]
+            self.move(move_arg)
+        
+        elif command == "quit":
+            self.quit(None)
+        
+        else:
+            print('unknown command')
 
     def push_output(self):
         """
